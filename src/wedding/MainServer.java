@@ -2,15 +2,11 @@ package wedding;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
-import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.sql.SQLException;
-
-import javax.sound.sampled.Port;
 
 import wedding.server.ServerAssistance;
 
@@ -18,9 +14,9 @@ public class MainServer implements NetworkConstants{
 
 	public static void main(String[] args) {
 		try {
-			ServerAssistance serverAssistance = new ServerAssistance(appPort);
-			Registry registry = LocateRegistry.createRegistry(registryPort);
-		    registry.rebind("rmi://" + host + ":" + appPort + "/ServerAssistantI", serverAssistance);
+			ServerAssistance serverAssistance = new ServerAssistance(APP_PORT);
+			Registry registry = LocateRegistry.createRegistry(REGISTRY_PORT);
+		    registry.rebind("rmi://" + HOST + ":" + APP_PORT + "/ServerAssistantI", serverAssistance);
 		    System.out.println("Server started");
 		} catch (RemoteException e) {
 		    System.out.println(e.getClass() + ": " + e.getMessage());

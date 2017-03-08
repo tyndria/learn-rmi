@@ -18,7 +18,6 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
-import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -60,8 +59,8 @@ public class MainClient implements NetworkConstants {
 		MainClient mainClient = new MainClient();
 		
 		try {
-			Registry registry = LocateRegistry.getRegistry(registryPort);
-			String addres = "rmi://" + host + ":" + appPort + "/ServerAssistantI";
+			Registry registry = LocateRegistry.getRegistry(REGISTRY_PORT);
+			String addres = "rmi://" + HOST + ":" + APP_PORT + "/ServerAssistantI";
 			mainClient.serverAssistant = (ServerAssistantI)registry.lookup(addres);
 			FrameAssistant frameAssistant = new FrameAssistant("Wedding!", mainClient.serverAssistant);
 			frameAssistant.setSize(1300, 900);
