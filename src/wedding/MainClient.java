@@ -1,4 +1,4 @@
-package wedding.client;
+package wedding;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -21,6 +21,8 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,20 +47,22 @@ import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import wedding.client.AddPersonDialog;
 import wedding.models.Couple;
 import wedding.models.Person;
 import wedding.models.Request;
 import wedding.server.ServerAssistantI;
 
-public class MainClient {
+public class MainClient implements NetworkConstants {
 	ServerAssistantI serverAssistant;
 
 	public static void main(String[] args) throws FileNotFoundException, ClassNotFoundException, IOException, SQLException {
 		MainClient mainClient = new MainClient();
 		
 		try {
-			String host = (args.length > 0) ? args[0] : "localhost";
-			mainClient.serverAssistant = (ServerAssistantI)Naming.lookup("rmi://158.129.226.122:5000/ServerAssistantI");
+			Registry registry = LocateRegistry.getRegistry(registryPort);
+			String addres = "rmi://" + host + ":" + appPort + "/ServerAssistantI";
+			mainClient.serverAssistant = (ServerAssistantI)registry.lookup(addres);
 			FrameAssistant frameAssistant = new FrameAssistant("Wedding!", mainClient.serverAssistant);
 			frameAssistant.setSize(1300, 900);
 			frameAssistant.setVisible(true);
@@ -334,15 +338,17 @@ class FrameAssistant extends JFrame implements ActionListener {
 		try {
 			if (e.getSource() == brideAddButton) {
 				openDialog();
-				if (dialog.isOk) {
-					brideListModel.addElement(dialog.person);
-					requests.add(new Request("post", "bride", dialog.person));
+				if (dialog.getStatus()) {
+					Person newPerson = dialog.getPerson();
+					brideListModel.addElement(newPerson);
+					requests.add(new Request("post", "bride", newPerson));
 				}
 			} else if (e.getSource() == groomAddButton) {
 				openDialog();
-				if (dialog.isOk) {
-					groomListModel.addElement(dialog.person);
-					requests.add(new Request("post", "groom", dialog.person));
+				if (dialog.getStatus()) {
+					Person newPerson = dialog.getPerson();
+					groomListModel.addElement(newPerson);
+					requests.add(new Request("post", "groom", newPerson));
 				}
 			} else if (e.getSource() == checkItem) {
 				coupleListModel.clear();

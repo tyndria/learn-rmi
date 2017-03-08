@@ -3,6 +3,7 @@ package wedding.server;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -20,7 +21,8 @@ public class ServerAssistance extends UnicastRemoteObject implements ServerAssis
 	SQLAssistant sqlAssistant;
 	Analyser analyser;
 	
-	public ServerAssistance () throws FileNotFoundException, ClassNotFoundException, IOException, SQLException {
+	public ServerAssistance (int port) throws FileNotFoundException, ClassNotFoundException, IOException, SQLException {
+		super(port);
 		sqlAssistant = new SQLAssistant();
 		analyser = new Analyser();
 	}

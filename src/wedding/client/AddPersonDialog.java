@@ -121,6 +121,14 @@ public class AddPersonDialog extends JDialog {
 			textField.setText("");
 		}
 	}
+	
+	public Person getPerson() {
+		return this.person;
+	}
+	
+	public boolean getStatus() {
+		return this.isOk;
+	}
 
 	private ArrayList<String> getArrayFromString(String str) {
 		ArrayList<String> arrayList = new ArrayList<>();
