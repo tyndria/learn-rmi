@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 import org.json.JSONArray;
 
+import wedding.FileAssintant;
 import wedding.models.Person;
 
 public class SQLAssistant implements Constants{
@@ -26,6 +27,21 @@ public class SQLAssistant implements Constants{
         }
     }
     
+    public void createTable(String tableName) throws SQLException {
+    	String idTitle = "id_" + tableName;
+    	String createTableSql = "CREATE TABLE " + tableName +
+                "(" + idTitle + " INTEGER UNSIGNED NOT NULL AUTO_INCREMENT, " +
+                " name VARCHAR(45), " + 
+                " surname VARCHAR(45), " + 
+                " birth_year VARCHAR(45), " + 
+                " personal_description VARCHAR(255), " + 
+                " demands VARCHAR(255), " + 
+                " PRIMARY KEY ( " + idTitle + " ))"; 
+    	PreparedStatement preparedStatement = connection.prepareStatement(createTableSql);
+        preparedStatement.execute();
+        preparedStatement.close();
+    }
+    
     public void insertPerson(String tableName, Person person) throws SQLException{
         String insertSql = "INSERT INTO " + tableName + " " +
                      "(NAME, SURNAME, BIRTH_YEAR, PERSONAL_DESCRIPTION, DEMANDS)VALUES" +
@@ -38,17 +54,6 @@ public class SQLAssistant implements Constants{
         preparedStatement.setString(5, convertArrayToJSON(person.demands));     
         preparedStatement.executeUpdate();
         preparedStatement.close();
-    }
-
-    public long completeUpdate(String cityNameToFind, String cityNameToReplace) throws SQLException{
-        String updateSql = "UPDATE Citymap SET city_name = ? WHERE city_name = ?";
-        PreparedStatement preparedStatement = connection.prepareStatement(updateSql);
-        preparedStatement.setString(1, cityNameToReplace);
-        preparedStatement.setString(2, cityNameToFind);
-        long beforeInsert = System.currentTimeMillis();
-        preparedStatement.executeUpdate();
-        long afterInsert = System.currentTimeMillis();
-        return afterInsert - beforeInsert;
     }
 
     public void deletePerson(String tableName, int id) throws SQLException {

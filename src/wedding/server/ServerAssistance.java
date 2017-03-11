@@ -8,6 +8,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import wedding.FileAssintant;
 import wedding.database.SQLAssistant;
 import wedding.models.Couple;
 import wedding.models.Person;
@@ -25,6 +26,22 @@ public class ServerAssistance extends UnicastRemoteObject implements ServerAssis
 		super(port);
 		sqlAssistant = new SQLAssistant();
 		analyser = new Analyser();
+		
+		//TEMPORARY FUNCTION CALLS
+		//loadRecordsToDatabase("brides.txt", "bride");
+		//loadRecordsToDatabase("grooms.txt", "groom");
+	}
+	
+	//TEMPORARY FUNCTION
+	public void loadRecordsToDatabase(String fileName, String tableName) throws SQLException, FileNotFoundException {
+		sqlAssistant.createTable(tableName);
+		
+		FileAssintant fileAssintant = new FileAssintant();
+		ArrayList<Person> list = fileAssintant.getRecordsFromFile(fileName, tableName);
+		
+		for(Person person: list) {
+			sqlAssistant.insertPerson(tableName, person);
+		}
 	}
 
 	@Override
