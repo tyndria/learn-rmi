@@ -14,6 +14,7 @@ public class MainServer implements NetworkConstants{
 
 	public static void main(String[] args) {
 		try {
+			System.setProperty("java.rmi.server.hostname", HOST);
 			ServerAssistance serverAssistance = new ServerAssistance(APP_PORT);
 			Registry registry = LocateRegistry.createRegistry(REGISTRY_PORT);
 		    registry.rebind("rmi://" + HOST + ":" + APP_PORT + "/ServerAssistantI", serverAssistance);

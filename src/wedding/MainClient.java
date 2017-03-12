@@ -59,7 +59,7 @@ public class MainClient implements NetworkConstants {
 		MainClient mainClient = new MainClient();
 		
 		try {
-			Registry registry = LocateRegistry.getRegistry(REGISTRY_PORT);
+			Registry registry = LocateRegistry.getRegistry(HOST, REGISTRY_PORT);
 			String addres = "rmi://" + HOST + ":" + APP_PORT + "/ServerAssistantI";
 			mainClient.serverAssistant = (ServerAssistantI)registry.lookup(addres);
 			FrameAssistant frameAssistant = new FrameAssistant("Wedding!", mainClient.serverAssistant);
@@ -76,7 +76,6 @@ public class MainClient implements NetworkConstants {
 }
 
 class FrameAssistant extends JFrame implements ActionListener {
-
 	DefaultListModel<Person> brideListModel, groomListModel;
 	DefaultListModel<Couple> coupleListModel;
 	JList<Person> brideJList, groomJList;
