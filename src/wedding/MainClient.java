@@ -81,14 +81,14 @@ class FrameAssistant extends JFrame implements ActionListener {
 	JList<Person> brideJList, groomJList;
 	JList<Couple> coupleJList;
 	java.util.List<Person> selectedBrides, selectedGrooms;
-	JMenuItem checkItem, coupleSaveButton, brideAddButton, groomAddButton, brideSaveButton, groomSaveButton,
+	JMenuItem checkItem, brideAddButton, groomAddButton, brideSaveButton, groomSaveButton,
 			brideDeleteButton, groomDeleteButton;
 	Font font;
 	AddPersonDialog dialog;
 	JPanel checkPanel, textPanel;
 	JTextArea textArea, wordWrapArea;
 	ServerAssistantI serverAssistant;
-	Boolean isBrideListChanged, isGroomListChanged, isCoupleListChanged, isNewFileCreated;
+	Boolean isBrideListChanged, isGroomListChanged, isNewFileCreated;
 	ArrayList<Request> requests = new ArrayList<>();
 
 	public FrameAssistant(String s, ServerAssistantI serverAssistantI) throws FileNotFoundException, ClassNotFoundException, IOException, SQLException {
@@ -101,7 +101,7 @@ class FrameAssistant extends JFrame implements ActionListener {
 
 		font = new Font("Verdana", Font.PLAIN, 20);
 		this.setLayout(new GridLayout(3, 1));
-		this.setJMenuBar(createMenu());
+		this.setJMenuBar(createMenuBar());
 
 		this.getContentPane().add(createListPanel("Brides", brideJList));
 		this.getContentPane().add(createListPanel("Ideal couples ^^", coupleJList));
@@ -116,7 +116,6 @@ class FrameAssistant extends JFrame implements ActionListener {
 
 		isBrideListChanged = false;
 		isGroomListChanged = false;
-		isCoupleListChanged = false;
 		isNewFileCreated = false;
 
 		coupleListModel = new DefaultListModel<Couple>();
@@ -178,27 +177,6 @@ class FrameAssistant extends JFrame implements ActionListener {
 				isGroomListChanged = true;
 			}
 		});
-
-		coupleListModel.addListDataListener(new ListDataListener() {
-
-			@Override
-			public void intervalRemoved(ListDataEvent arg0) {
-				isCoupleListChanged = true;
-
-			}
-
-			@Override
-			public void intervalAdded(ListDataEvent arg0) {
-				isCoupleListChanged = true;
-
-			}
-
-			@Override
-			public void contentsChanged(ListDataEvent arg0) {
-				isCoupleListChanged = true;
-
-			}
-		});
 	}
 
 	private void selectionProcess() {
@@ -241,13 +219,6 @@ class FrameAssistant extends JFrame implements ActionListener {
 				} catch(RemoteException e) {
 					System.out.println(e.getClass() + ": " + e.getMessage());
 				}
-				if (isCoupleListChanged && isNewFileCreated) {
-					int reply = JOptionPane.showConfirmDialog(null, "Do you want to save your changed couples file?",
-							"Really Closing?", JOptionPane.YES_NO_OPTION);
-					if (reply == JOptionPane.YES_OPTION) {
-						saveCoupleFile();
-					}
-				}
 				System.exit(0);
 			}
 		});
@@ -278,7 +249,7 @@ class FrameAssistant extends JFrame implements ActionListener {
 		return textPanel;
 	}
 
-	private JMenuBar createMenu() {
+	private JMenuBar createMenuBar() {
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.setFont(font);
 
@@ -290,9 +261,6 @@ class FrameAssistant extends JFrame implements ActionListener {
 
 		JMenu groomMenu = new JMenu("Groom");
 		groomMenu.setFont(font);
-
-		JMenu coupleMenu = new JMenu("Couples");
-		coupleMenu.setFont(font);
 
 		checkItem = createMenuItem("Check", font);
 		analyseMenu.add(checkItem);
@@ -311,12 +279,8 @@ class FrameAssistant extends JFrame implements ActionListener {
 		groomMenu.add(groomDeleteButton);
 		groomMenu.add(groomSaveButton);
 
-		coupleSaveButton = createMenuItem("Save", font);
-		coupleMenu.add(coupleSaveButton);
-
 		menuBar.add(brideMenu);
 		menuBar.add(groomMenu);
-		menuBar.add(coupleMenu);
 		menuBar.add(analyseMenu);
 
 		return menuBar;
@@ -374,9 +338,7 @@ class FrameAssistant extends JFrame implements ActionListener {
 					}
 				}
 				selectedGrooms.clear();
-			} else if (e.getSource() == coupleSaveButton) {
-				saveCoupleFile();
-			}
+			} 
 		} catch (RemoteException e1) {
 			System.out.println(e1.getMessage());
 		}
@@ -387,14 +349,6 @@ class FrameAssistant extends JFrame implements ActionListener {
 			dialog = new AddPersonDialog(this);
 		dialog.setSize(300, 300);
 		dialog.setVisible(true);
-	}
-
-	private JFileChooser createFileChooser() {
-		JFileChooser chooser = new JFileChooser();
-		chooser.setCurrentDirectory(new File("."));
-		chooser.setDialogTitle("Save file");
-		chooser.setFileSelectionMode(JFileChooser.APPROVE_OPTION);
-		return chooser;
 	}
 
 	private void doRequests(String tableName) throws RemoteException {
@@ -414,27 +368,5 @@ class FrameAssistant extends JFrame implements ActionListener {
 		}
 		
 		JOptionPane.showMessageDialog(null, "Save!");
-	}
-	
-	private void saveCoupleFile() {
-		JFileChooser chooser = createFileChooser();
-		int state = chooser.showSaveDialog(null);
-		if (state == JFileChooser.APPROVE_OPTION) {
-			File file = chooser.getSelectedFile();
-			try {
-				Writer writer = new OutputStreamWriter(new FileOutputStream(file, false), "UTF-8");
-
-				for (Couple couple : Collections.list(coupleListModel.elements())) {
-					writer.write(couple.toString() + "; ");
-				}
-				writer.close();
-				JOptionPane.showMessageDialog(null, "Save!");
-				isNewFileCreated = true;
-			} catch (UnsupportedEncodingException | FileNotFoundException e1) {
-				System.out.println(e1.getMessage());
-			} catch (IOException e1) {
-				System.out.println(e1.getMessage());
-			}
-		}
 	}
 }
