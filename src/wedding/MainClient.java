@@ -355,7 +355,7 @@ class FrameAssistant extends JFrame implements ActionListener {
 		Iterator<Request> iterator = requests.iterator();
 		while (iterator.hasNext()) {
 			Request request = iterator.next();
-			if (request.tableName.equals(tableName)) {
+			if (request.getTableName().equals(tableName)) {
 				serverAssistant.doRequest(request);
 				iterator.remove();
 			}

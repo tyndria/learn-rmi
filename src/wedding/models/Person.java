@@ -10,12 +10,12 @@ public class Person implements Serializable {
 
 	private static final long serialVersionUID = 12358903454875L;
 
-	public String birthYear;
-	public String name;
-	public String surname;
-	public ArrayList<String> personalDescription;
-	public ArrayList<String> demands;
-	public int id;
+	String birthYear;
+	String name;
+	String surname;
+	ArrayList<String> personalDescription;
+	ArrayList<String> demands;
+	int id;
 
 	public Person(String birthYear, String name, String surname, ArrayList<String> personalDescription,
 			ArrayList<String> demands, int id) {
@@ -78,6 +78,18 @@ public class Person implements Serializable {
 
 	public String getFullName() {
 		return name + " " + surname;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public String getSurname() {
+		return surname;
+	}
+	
+	public int getId() {
+		return id;
 	}
 
 	public ArrayList<String> getPersonalDescription() {

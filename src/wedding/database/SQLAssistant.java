@@ -47,19 +47,19 @@ public class SQLAssistant implements Constants{
                      "(NAME, SURNAME, BIRTH_YEAR, PERSONAL_DESCRIPTION, DEMANDS)VALUES" +
                      "(?, ?, ?, ?, ?)";
         PreparedStatement preparedStatement = connection.prepareStatement(insertSql);
-        preparedStatement.setString(1, person.name);
-        preparedStatement.setString(2, person.surname);
-        preparedStatement.setString(3, person.birthYear);
-        preparedStatement.setString(4, convertArrayToJSON(person.personalDescription));
-        preparedStatement.setString(5, convertArrayToJSON(person.demands));     
+        preparedStatement.setString(1, person.getName());
+        preparedStatement.setString(2, person.getSurname());
+        preparedStatement.setString(3, person.getBirthYear());
+        preparedStatement.setString(4, convertArrayToJSON(person.getPersonalDescription()));
+        preparedStatement.setString(5, convertArrayToJSON(person.getDemands()));     
         preparedStatement.executeUpdate();
         preparedStatement.close();
     }
 
-    public void deletePerson(String tableName, int id) throws SQLException {
+    public void deletePerson(String tableName, Person person) throws SQLException {
     	String deleteSql = "DELETE FROM " + tableName + " where id_" + tableName + " = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(deleteSql);
-        preparedStatement.setInt(1, id);
+        preparedStatement.setInt(1, person.getId());
         preparedStatement.executeUpdate();
         preparedStatement.close();
     }

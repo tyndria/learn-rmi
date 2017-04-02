@@ -53,15 +53,15 @@ public class ServerAssistance extends UnicastRemoteObject implements ServerAssis
 	public ArrayList doRequest(Request request) throws RemoteException {
 		ArrayList list = null;
 		try {
-			switch(request.type) {
+			switch(request.getType()) {
 				case "post":
-					sqlAssistant.insertPerson(request.tableName, request.person);
+					sqlAssistant.insertPerson(request.getTableName(), request.getData());
 					break;
 				case "delete":
-					sqlAssistant.deletePerson(request.tableName, request.person.id);
+					sqlAssistant.deletePerson(request.getTableName(), request.getData());
 					break;
 				case "get":
-					list = sqlAssistant.selectPeople(request.tableName);
+					list = sqlAssistant.selectPeople(request.getTableName());
 					break;
 			}
 		} catch(SQLException e) {

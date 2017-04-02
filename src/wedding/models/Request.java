@@ -10,14 +10,26 @@ public class Request implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	public String tableName;
-	public String type;
-	public Person person;
+	String tableName;
+	String type;
+	Person person;
 	
 	public Request(String type, String tableName, Person person) {
 		this.type = type;
 		this.tableName = tableName;
 		this.person = person;
+	}
+	
+	public String getTableName() {
+		return this.tableName;
+	}
+	
+	public Person getData() {
+		return this.person;
+	}
+	
+	public String getType() {
+		return this.type;
 	}
 	
 	private void writeObject(ObjectOutputStream out) throws IOException, ClassNotFoundException {
