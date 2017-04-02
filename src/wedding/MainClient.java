@@ -128,7 +128,7 @@ class FrameAssistant extends JFrame implements ActionListener {
 		for (Person groom : grooms) {
 			groomListModel.addElement(groom);
 		}
-		for (Couple couple : serverAssistant.getCouples(brides, grooms)) {
+		for (Couple couple : serverAssistant.getBestCouples(brides, grooms)) {
 			coupleListModel.addElement(couple);
 		}
 
@@ -314,7 +314,7 @@ class FrameAssistant extends JFrame implements ActionListener {
 				}
 			} else if (e.getSource() == checkItem) {
 				coupleListModel.clear();
-				for (Couple couple : serverAssistant.getCouples(Collections.list(brideListModel.elements()),
+				for (Couple couple : serverAssistant.getBestCouples(Collections.list(brideListModel.elements()),
 						Collections.list(groomListModel.elements()))) {
 					coupleListModel.addElement(couple);
 				}

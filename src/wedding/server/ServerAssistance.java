@@ -45,8 +45,15 @@ public class ServerAssistance extends UnicastRemoteObject implements ServerAssis
 	}
 
 	@Override
-	public ArrayList<Couple> getCouples(ArrayList<Person> brides, ArrayList<Person> grooms) throws RemoteException {
-		return analyser.analyseBridesAndGrooms(brides, grooms);
+	public ArrayList<Couple> getBestCouples(ArrayList<Person> brides, ArrayList<Person> grooms) 
+			throws RemoteException{
+		ArrayList<Couple> bestCouples = null;
+		try {
+			bestCouples = analyser.analyseBridesAndGrooms(brides, grooms);
+		} catch (NullPointerException e) {
+			System.out.println("No couples");
+		}
+		return bestCouples;
 	}
 
 	@Override

@@ -10,6 +10,6 @@ import wedding.models.Request;
 
 public interface ServerAssistantI extends Remote {
 
-	public ArrayList<Couple> getCouples(ArrayList<Person> brides, ArrayList<Person> grooms) throws RemoteException;
+	public ArrayList<Couple> getBestCouples(ArrayList<Person> brides, ArrayList<Person> grooms) throws RemoteException;
 	public ArrayList doRequest(Request request) throws RemoteException;
 }
