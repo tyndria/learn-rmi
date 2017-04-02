@@ -1,5 +1,16 @@
 package wedding;
 
+/**
+ * <h1> Wedding <h1>
+ * 
+ * The application Wedding provide possibility to
+ * get the best suitable couples 
+ * from the list of men and women
+ * 
+ * @author Antonina
+ *
+ */
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
