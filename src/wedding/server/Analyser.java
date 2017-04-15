@@ -20,7 +20,7 @@ public class Analyser implements Serializable {
 	 * @param brides list of brides to make suitable couple
 	 * @param grooms list of grooms to make suitable couple
 	 * @return 		 the list of the most suitable couple
-	 * @exception NullPointerException when there is no suitable coules
+	 * @exception NullPointerException when there is no suitable couples
 	 * @see java.lang.NullPointerException
 	 * 
 	 */

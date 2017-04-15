@@ -1,33 +1,13 @@
 package wedding;
 
-/**
- * <h1> Wedding <h1>
- * 
- * The application Wedding provide possibility to
- * get the best suitable couples 
- * from the list of men and women
- * 
- * @author Antonina
- *
- */
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-
-/*7.	«Электронная сваха». На основе анализа файла возможных женихов и невест, 
-где хранится информация о себе и требования к партнеру, выдать список «идеальных» пар.*/
-
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -63,6 +43,22 @@ import wedding.models.Person;
 import wedding.models.Request;
 import wedding.server.ServerAssistantI;
 
+/**
+ * <h1> Wedding </h1>
+ * 
+ * <div style="text-align: center;">The application Wedding provide possibility to
+ * get the best suitable couples
+ * from the list of men and women </div>
+ * <div>Technologies</div>
+ * <ul>
+ * 	<li>Remote method invocation, see {@link wedding.server.ServerAssistantI}</li>
+ * 	<li>Serialization, see {@link wedding.models.Person}</li>
+ * 	<li>Database connection, see {@link wedding.database.SQLAssistant}</li>
+ * </ul>
+ * 
+ * @author Antonina
+ *
+ */
 public class MainClient implements NetworkConstants {
 	ServerAssistantI serverAssistant;
 
