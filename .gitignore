@@ -3,3 +3,6 @@ src/wedding/database/Constants.java
 src/wedding/NetworkConstants.java
 .settings/
 lib/
+.idea/
+ideaDocs/
+target/
