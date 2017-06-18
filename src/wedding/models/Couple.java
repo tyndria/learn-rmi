@@ -40,7 +40,6 @@ public class Couple implements Serializable{
 		this.groom = groom;
 	}
 
-	@Override
 	public String toString() {
 		return this.bride.getFullName() + " + " + this.groom.getFullName();
 	}

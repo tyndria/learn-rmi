@@ -8,12 +8,13 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import wedding.database.SQLAssistant;
 import wedding.models.Person;
 
-public class FileAssintant {
+public class FileAssistant {
 
 	SQLAssistant sqlAssistant;
 	PrintWriter printWriter;
@@ -22,7 +23,7 @@ public class FileAssintant {
 	ArrayList<Person> grooms;
 	
 	
-	public FileAssintant() {
+	public FileAssistant() {
 		sqlAssistant = new SQLAssistant();
 		
 //		try {
@@ -49,7 +50,7 @@ public class FileAssintant {
 		printWriter.close();
 	}
 
-	public ArrayList getRecordsFromFile(String fileName, String tableName) throws FileNotFoundException {
+	public ArrayList getRecordsFromFile(String fileName, String tableName) throws FileNotFoundException, JSONException {
 		StringBuilder stringBuilder = new StringBuilder();
 		scanner = new Scanner(new File(fileName));
 		while(scanner.hasNext()) {
@@ -61,7 +62,7 @@ public class FileAssintant {
     	ArrayList<Person> arrayList = new ArrayList<>();
     	for(int i = 0; i < jsonArray.length(); i ++) {
     		JSONObject jsonObject = (JSONObject)jsonArray.get(i);
-    		JSONArray personalDescription = (JSONArray)jsonObject.get("personalDescription");
+    		JSONArray personalDescription = (JSONArray)jsonObject.get("propositions");
     		JSONArray demands = (JSONArray)jsonObject.get("demands");
     		arrayList.add(new Person(
     				jsonObject.getString("birthYear"), 

@@ -8,6 +8,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.sql.SQLException;
 
+import org.json.JSONException;
 import wedding.server.ServerAssistance;
 
 public class MainServer implements NetworkConstants{
@@ -19,18 +20,8 @@ public class MainServer implements NetworkConstants{
 			Registry registry = LocateRegistry.createRegistry(REGISTRY_PORT);
 		    registry.rebind("rmi://" + HOST + ":" + APP_PORT + "/ServerAssistantI", serverAssistance);
 		    System.out.println("Server started");
-		} catch (RemoteException e) {
-		    System.out.println(e.getClass() + ": " + e.getMessage());
-		} catch (MalformedURLException e) {
-			 System.out.println(e.getClass() + ": " + e.getMessage());
-		} catch (FileNotFoundException e) {
-			 System.out.println(e.getClass() + ": " + e.getMessage());
-		} catch (ClassNotFoundException e) {
-			 System.out.println(e.getClass() + ": " + e.getMessage());
-		} catch (IOException e) {
-			 System.out.println(e.getClass() + ": " + e.getMessage());
-		} catch (SQLException e) {
-			 System.out.println(e.getClass() + ": " + e.getMessage());
+		} catch (ClassNotFoundException | IOException | SQLException | JSONException e) {
+			System.out.println(e.getClass() + ": " + e.getMessage());
 		}
 	}
 }

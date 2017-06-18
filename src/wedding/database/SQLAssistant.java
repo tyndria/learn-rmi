@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 import org.json.JSONArray;
 
-import wedding.FileAssintant;
+import org.json.JSONException;
 import wedding.models.Person;
 
 public class SQLAssistant implements Constants{
@@ -18,10 +18,7 @@ public class SQLAssistant implements Constants{
     
     public SQLAssistant() {
         try {
-            Class.forName("com.mysql.jdbc.Driver");
             connection = DriverManager.getConnection(DB_URL,USER,PASS);
-        } catch (ClassNotFoundException e) {
-            System.out.println("---" + e.getClass() + ": " +  e.getMessage());
         } catch (SQLException e) {
             System.out.println("---" + e.getClass() + ": " +  e.getMessage());
         }
@@ -50,7 +47,7 @@ public class SQLAssistant implements Constants{
         preparedStatement.setString(1, person.getName());
         preparedStatement.setString(2, person.getSurname());
         preparedStatement.setString(3, person.getBirthYear());
-        preparedStatement.setString(4, convertArrayToJSON(person.getPersonalDescription()));
+        preparedStatement.setString(4, convertArrayToJSON(person.getPropositions()));
         preparedStatement.setString(5, convertArrayToJSON(person.getDemands()));     
         preparedStatement.executeUpdate();
         preparedStatement.close();
@@ -64,7 +61,7 @@ public class SQLAssistant implements Constants{
         preparedStatement.close();
     }
 
-    public ArrayList<Person> selectPeople(String tableName) throws SQLException {
+    public ArrayList<Person> selectPeople(String tableName) throws SQLException, JSONException {
         String selectSql = "SELECT * FROM " + tableName;
         PreparedStatement preparedStatement = connection.prepareStatement(selectSql);
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -86,7 +83,7 @@ public class SQLAssistant implements Constants{
     	return jsonArray.toString();
     }
     
-    public ArrayList<String> convertJSONToArray(String json) {
+    public ArrayList<String> convertJSONToArray(String json) throws JSONException{
     	JSONArray jsonArray = new JSONArray(json);
     	ArrayList<String> arrayList = new ArrayList<>();
     	for(int i = 0; i < jsonArray.length(); i ++) {

@@ -5,48 +5,70 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-public class Request implements Serializable {
+public class Request<T> implements Serializable {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	String tableName;
-	String type;
-	Person person;
+	private String storageName;
+	private String requestType;
+	private String technologyType;
+	private T[] params;
 	
-	public Request(String type, String tableName, Person person) {
-		this.type = type;
-		this.tableName = tableName;
-		this.person = person;
+	public Request(String requestType, String technologyType, String storageName, T... params) {
+		this.requestType = requestType;
+		this.technologyType = technologyType;
+		this.storageName = storageName;
+		this.params = params;
 	}
 	
-	public String getTableName() {
-		return this.tableName;
+	public String getStorageName() {
+		return this.storageName;
 	}
 	
-	public Person getData() {
-		return this.person;
+	public T[] getParams() {
+		return this.params;
 	}
 	
-	public String getType() {
-		return this.type;
+	public String getRequestType() {
+		return this.requestType;
+	}
+	
+	public void setStorageName(String storageName) {
+		this.storageName = storageName;
+	}
+	
+	public void setRequestType(String requestType) {
+		this.requestType = requestType;
+	}
+	
+	public void setParams(T[] params) {
+		this.params = params;
+	}
+
+	public void setTechnologyType(String technologyType) {
+		this.technologyType = technologyType;
+	}
+
+	public String getTechnologyType() {
+		return technologyType;
 	}
 	
 	private void writeObject(ObjectOutputStream out) throws IOException, ClassNotFoundException {
 		out.defaultWriteObject();
-		out.writeObject(this.tableName);
-		out.writeObject(this.type);
-		out.writeObject(this.person);
+		out.writeObject(this.storageName);
+		out.writeObject(this.requestType);
+		out.writeObject(this.params);
 	}
 
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
-		this.tableName = (String) in.readObject();
-		this.type = (String) in.readObject();
-		this.person = (Person) in.readObject();
+		this.storageName = (String) in.readObject();
+		this.requestType = (String) in.readObject();
+		this.params = (T[]) in.readObject();
 	}
 	
 	public String toString() {
-		return "table: " +  this.tableName + "; type: " + this.type + "; person: " + this.person;
+		return "table: " +  this.storageName + "; requestType: " + this.requestType + "; params: " + this.params;
 	}
 }

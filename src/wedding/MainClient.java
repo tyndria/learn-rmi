@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import javax.swing.DefaultListModel;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -37,6 +36,7 @@ import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.json.JSONException;
 import wedding.client.AddPersonDialog;
 import wedding.models.Couple;
 import wedding.models.Person;
@@ -62,7 +62,7 @@ import wedding.server.ServerAssistantI;
 public class MainClient implements NetworkConstants {
 	ServerAssistantI serverAssistant;
 
-	public static void main(String[] args) throws FileNotFoundException, ClassNotFoundException, IOException, SQLException {
+	public static void main(String[] args) throws ClassNotFoundException, IOException, SQLException, JSONException {
 		MainClient mainClient = new MainClient();
 		
 		try {
@@ -72,12 +72,12 @@ public class MainClient implements NetworkConstants {
 			FrameAssistant frameAssistant = new FrameAssistant("Wedding!", mainClient.serverAssistant);
 			frameAssistant.setSize(1300, 900);
 			frameAssistant.setVisible(true);
-		} catch (RemoteException re) {
-		    System.out.println("RemoteException: "+re);
-		} catch (NotBoundException nbe) {
-		    System.out.println("NotBoundException: "+nbe);
-		} catch (MalformedURLException mfe) {
-		    System.out.println("NotBoundException: "+mfe);
+		} catch (RemoteException e) {
+		    System.out.println(e.getMessage());
+		} catch (NotBoundException | MalformedURLException e) {
+		    System.out.println(e.getMessage());
+		} catch (JSONException e) {
+		    System.out.println(e.getMessage());
 		}
 	}
 }
@@ -97,8 +97,9 @@ class FrameAssistant extends JFrame implements ActionListener {
 	ServerAssistantI serverAssistant;
 	Boolean isBrideListChanged, isGroomListChanged, isNewFileCreated;
 	ArrayList<Request> requests = new ArrayList<>();
+	String TECHNOLOGY_TYPE = "xml";
 
-	public FrameAssistant(String s, ServerAssistantI serverAssistantI) throws FileNotFoundException, ClassNotFoundException, IOException, SQLException {
+	public FrameAssistant(String s, ServerAssistantI serverAssistantI) throws ClassNotFoundException, IOException, SQLException, NullPointerException, JSONException {
 		super(s);
 		this.serverAssistant = serverAssistantI;
 
@@ -117,9 +118,15 @@ class FrameAssistant extends JFrame implements ActionListener {
 		closeWindow();
 	}
 
-	private void getData() throws FileNotFoundException, ClassNotFoundException, IOException, SQLException {
-		ArrayList<Person> brides = serverAssistant.doRequest(new Request("get", "bride", null));
-		ArrayList<Person> grooms = serverAssistant.doRequest(new Request("get", "groom", null));
+	private void getData() throws JSONException, ClassNotFoundException, IOException, SQLException, NullPointerException {
+		ArrayList<Person> brides = serverAssistant.doRequest(new Request<Person>(
+				"read",
+				TECHNOLOGY_TYPE,
+				"bride"));
+		ArrayList<Person> grooms = serverAssistant.doRequest(new Request<Person>(
+				"read",
+				TECHNOLOGY_TYPE,
+				"groom"));
 
 		isBrideListChanged = false;
 		isGroomListChanged = false;
@@ -135,8 +142,12 @@ class FrameAssistant extends JFrame implements ActionListener {
 		for (Person groom : grooms) {
 			groomListModel.addElement(groom);
 		}
-		for (Couple couple : serverAssistant.getBestCouples(brides, grooms)) {
-			coupleListModel.addElement(couple);
+
+		ArrayList<Couple> bestCouples = serverAssistant.getBestCouples(brides, grooms);
+		if (bestCouples != null) {
+			for (Couple couple : serverAssistant.getBestCouples(brides, grooms)) {
+				coupleListModel.addElement(couple);
+			}
 		}
 
 		brideJList = new JList<Person>(brideListModel);
@@ -223,7 +234,7 @@ class FrameAssistant extends JFrame implements ActionListener {
 					if (isGroomListChanged) {
 						showSaveDialog("Do you want to save grooms?", "groom");
 					}
-				} catch(RemoteException e) {
+				} catch(RemoteException | JSONException e) {
 					System.out.println(e.getClass() + ": " + e.getMessage());
 				}
 				System.exit(0);
@@ -231,7 +242,7 @@ class FrameAssistant extends JFrame implements ActionListener {
 		});
 	}
 	
-	private void showSaveDialog(String dialogText, String tableName) throws RemoteException {
+	private void showSaveDialog(String dialogText, String tableName) throws RemoteException, JSONException {
 		int reply = JOptionPane.showConfirmDialog(null, dialogText,
 				"Really Closing?", JOptionPane.YES_NO_OPTION);
 		if (reply == JOptionPane.YES_OPTION) {
@@ -302,7 +313,7 @@ class FrameAssistant extends JFrame implements ActionListener {
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(ActionEvent e){
 
 		try {
 			if (e.getSource() == brideAddButton) {
@@ -310,14 +321,22 @@ class FrameAssistant extends JFrame implements ActionListener {
 				if (dialog.getStatus()) {
 					Person newPerson = dialog.getPerson();
 					brideListModel.addElement(newPerson);
-					requests.add(new Request("post", "bride", newPerson));
+					requests.add(new Request<Person>(
+							"create",
+							TECHNOLOGY_TYPE,
+							"bride",
+							newPerson));
 				}
 			} else if (e.getSource() == groomAddButton) {
 				openDialog();
 				if (dialog.getStatus()) {
 					Person newPerson = dialog.getPerson();
 					groomListModel.addElement(newPerson);
-					requests.add(new Request("post", "groom", newPerson));
+					requests.add(new Request<Person>(
+							"create",
+							TECHNOLOGY_TYPE,
+							"groom",
+							newPerson));
 				}
 			} else if (e.getSource() == checkItem) {
 				coupleListModel.clear();
@@ -333,7 +352,11 @@ class FrameAssistant extends JFrame implements ActionListener {
 				if (selectedBrides.size() != 0) {
 					for (Person bride : selectedBrides) {
 						brideListModel.removeElement(bride);
-						requests.add(new Request("delete", "bride", bride));
+						requests.add(new Request<Person>(
+								"delete",
+								TECHNOLOGY_TYPE,
+								"bride",
+								bride));
 					}
 				}
 				selectedBrides.clear();
@@ -341,12 +364,16 @@ class FrameAssistant extends JFrame implements ActionListener {
 				if (selectedGrooms.size() != 0) {
 					for (Person groom : selectedGrooms) {
 						groomListModel.removeElement(groom);
-						requests.add(new Request("delete", "groom", groom));
+						requests.add(new Request(
+								"delete",
+								TECHNOLOGY_TYPE,
+								"groom",
+								groom));
 					}
 				}
 				selectedGrooms.clear();
 			} 
-		} catch (RemoteException e1) {
+		} catch (RemoteException | JSONException e1) {
 			System.out.println(e1.getMessage());
 		}
 	}
@@ -358,11 +385,11 @@ class FrameAssistant extends JFrame implements ActionListener {
 		dialog.setVisible(true);
 	}
 
-	private void doRequests(String tableName) throws RemoteException {
+	private void doRequests(String tableName) throws RemoteException, JSONException {
 		Iterator<Request> iterator = requests.iterator();
 		while (iterator.hasNext()) {
 			Request request = iterator.next();
-			if (request.getTableName().equals(tableName)) {
+			if (request.getStorageName().equals(tableName)) {
 				serverAssistant.doRequest(request);
 				iterator.remove();
 			}

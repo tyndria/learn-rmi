@@ -3,45 +3,32 @@ package wedding.server;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import wedding.FileAssintant;
+import org.json.JSONException;
+import wedding.FileAssistant;
 import wedding.database.SQLAssistant;
 import wedding.models.Couple;
 import wedding.models.Person;
 import wedding.models.Request;
+import wedding.xml.StaxXmlAssistant;
 
 public class ServerAssistance extends UnicastRemoteObject implements ServerAssistantI {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	SQLAssistant sqlAssistant;
-	Analyser analyser;
+	private SQLAssistant sqlAssistant;
+	private StaxXmlAssistant staxXmlAssistant;
+	private Analyser analyser;
 	
-	public ServerAssistance (int port) throws FileNotFoundException, ClassNotFoundException, IOException, SQLException {
+	public ServerAssistance (int port) throws JSONException, ClassNotFoundException, IOException, SQLException {
 		super(port);
 		sqlAssistant = new SQLAssistant();
 		analyser = new Analyser();
-		
-		//TEMPORARY FUNCTION CALLS
-		//loadRecordsToDatabase("brides.txt", "bride");
-		//loadRecordsToDatabase("grooms.txt", "groom");
-	}
-	
-	//TEMPORARY FUNCTION
-	public void loadRecordsToDatabase(String fileName, String tableName) throws SQLException, FileNotFoundException {
-		sqlAssistant.createTable(tableName);
-		
-		FileAssintant fileAssintant = new FileAssintant();
-		ArrayList<Person> list = fileAssintant.getRecordsFromFile(fileName, tableName);
-		
-		for(Person person: list) {
-			sqlAssistant.insertPerson(tableName, person);
-		}
+		staxXmlAssistant = new StaxXmlAssistant();
 	}
 
 	@Override
@@ -57,18 +44,32 @@ public class ServerAssistance extends UnicastRemoteObject implements ServerAssis
 	}
 
 	@Override
-	public ArrayList doRequest(Request request) throws RemoteException {
+	public ArrayList doRequest(Request request) throws RemoteException, JSONException {
+		final String DATABASE = "database";
+		final String XML = "xml";
 		ArrayList list = null;
 		try {
-			switch(request.getType()) {
-				case "post":
-					sqlAssistant.insertPerson(request.getTableName(), request.getData());
+			switch(request.getRequestType()) {
+				case "create":
+					if (request.getTechnologyType().equals(DATABASE)) {
+						sqlAssistant.insertPerson(request.getStorageName(), (Person) request.getParams()[0]);
+					} else if(request.getTechnologyType().equals(XML)) {
+						staxXmlAssistant.create(request.getStorageName() + "s.xml", (Person) request.getParams()[0]);
+					}
 					break;
 				case "delete":
-					sqlAssistant.deletePerson(request.getTableName(), request.getData());
+					if (request.getTechnologyType().equals(DATABASE)) {
+						sqlAssistant.deletePerson(request.getStorageName(), (Person) request.getParams()[0]);
+					} else if(request.getTechnologyType().equals(XML)) {
+						staxXmlAssistant.delete(request.getStorageName() + "s.xml", ((Person) request.getParams()[0]).getId() + "");
+					}
 					break;
-				case "get":
-					list = sqlAssistant.selectPeople(request.getTableName());
+				case "read":
+					if (request.getTechnologyType().equals(DATABASE)) {
+						list = sqlAssistant.selectPeople(request.getStorageName());
+					} else if (request.getTechnologyType().equals(XML)){
+						list = staxXmlAssistant.read(request.getStorageName() + "s.xml");
+					}
 					break;
 			}
 		} catch(SQLException e) {
