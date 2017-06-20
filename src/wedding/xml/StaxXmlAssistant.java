@@ -1,21 +1,11 @@
 package wedding.xml;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.jdom2.Document;
-import org.jdom2.Element;
-import org.jdom2.JDOMException;
-import org.jdom2.input.SAXBuilder;
-import org.jdom2.output.Format;
-import org.jdom2.output.XMLOutputter;
 import wedding.models.Person;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.*;
 import javax.xml.stream.events.*;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.util.*;
 
@@ -24,9 +14,11 @@ import java.util.*;
  */
 public class StaxXmlAssistant {
     private XMLEventWriter xmlEventWriter;
-    XMLEventReader xmlEventReader;
+    private XMLEventReader xmlEventReader;
     private XMLEventFactory eventFactory;
     private XMLEvent end;
+
+    private ArrayList<Integer> ids = new ArrayList<>();
 
     public StaxXmlAssistant() {
         eventFactory = XMLEventFactory.newInstance();
@@ -68,7 +60,7 @@ public class StaxXmlAssistant {
         ArrayList<String> propositions = null, demands = null;
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
         try {
-            XMLEventReader xmlEventReader = xmlInputFactory.createXMLEventReader(new FileInputStream(fileName));
+            xmlEventReader = xmlInputFactory.createXMLEventReader(new FileInputStream(fileName));
             while(xmlEventReader.hasNext()) {
                 XMLEvent xmlEvent = xmlEventReader.nextEvent();
 
@@ -77,40 +69,32 @@ public class StaxXmlAssistant {
 
                     if(startElement.getName().getLocalPart().equals("person")) {
                         person = new Person();
-
                         Attribute idAttr = startElement.getAttributeByName(new QName("id"));
                         if(idAttr != null){
-                            person.setId(Integer.parseInt(idAttr.getValue()));
+                            Integer id = Integer.parseInt(idAttr.getValue());
+                            person.setId(id);
+                            ids.add(id);
                         }
                     } else if(startElement.getName().getLocalPart().equals("birthYear")) {
-                        xmlEvent = xmlEventReader.nextEvent();
-                        person.setBirthYear(xmlEvent.asCharacters().getData());
+                        person.setBirthYear(getEventData());
                     } else if(startElement.getName().getLocalPart().equals("name")) {
-                        xmlEvent = xmlEventReader.nextEvent();
-                        person.setName(xmlEvent.asCharacters().getData());
+                        person.setName(getEventData());
                     } else if(startElement.getName().getLocalPart().equals("surname")) {
-                        xmlEvent = xmlEventReader.nextEvent();
-                        person.setSurname(xmlEvent.asCharacters().getData());
+                        person.setSurname(getEventData());
                     } else if(startElement.getName().getLocalPart().equals("propositions")) {
-                        xmlEvent = xmlEventReader.nextEvent();
-                        String data = xmlEvent.asCharacters().getData();
                         propositions = new ArrayList<>();
-                        if (isRealData(data)) {
-                            propositions.add(data);
-                        }
+                        addDataToArray(propositions);
                     } else if(startElement.getName().getLocalPart().equals("demands")) {
-                        xmlEvent = xmlEventReader.nextEvent();
-                        String data = xmlEvent.asCharacters().getData();
                         demands = new ArrayList<>();
-                        if (isRealData(data)) {
-                            demands.add(data);
-                        }
+                        addDataToArray(demands);
                     } else if (startElement.getName().getLocalPart().equals("demand")) {
-                        xmlEvent = xmlEventReader.nextEvent();
-                        demands.add(xmlEvent.asCharacters().getData());
+                        if (demands != null) {
+                            demands.add(getEventData());
+                        }
                     } else if (startElement.getName().getLocalPart().equals("proposition")) {
-                        xmlEvent = xmlEventReader.nextEvent();
-                        propositions.add(xmlEvent.asCharacters().getData());
+                        if (propositions != null) {
+                            propositions.add(getEventData());
+                        }
                     }
                 } else if(xmlEvent.isEndElement()) {
                     EndElement endElement = xmlEvent.asEndElement();
@@ -130,6 +114,18 @@ public class StaxXmlAssistant {
         }
 
         return people;
+    }
+
+    private String getEventData() throws XMLStreamException{
+        XMLEvent xmlEvent = xmlEventReader.nextEvent();
+        return xmlEvent.asCharacters().getData();
+    }
+
+    private void addDataToArray(ArrayList arrayList) throws XMLStreamException{
+        String data = getEventData();
+        if (isRealData(data)) {
+            arrayList.add(data);
+        }
     }
 
     public void create(String fileName, Person person) {
@@ -173,14 +169,14 @@ public class StaxXmlAssistant {
                     } else {
                         xmlEventWriter.add(event);
                     }
-                    continue;
                 } else if (event.getEventType() == XMLEvent.END_ELEMENT &&
                         event.asEndElement().getName().toString().equals("person")) {
-                    deleteSection = false;
-                    continue;
-                } else if (deleteSection) {
-                    continue;
-                } else {
+                    if (!deleteSection) {
+                        xmlEventWriter.add(event);
+                    } else {
+                        deleteSection = false;
+                    }
+                } else if (!deleteSection) {
                     xmlEventWriter.add(event);
                 }
             }
@@ -194,26 +190,24 @@ public class StaxXmlAssistant {
         return data.matches(".*[a-zA-Z]+.*");
     }
 
+    private Integer getNextId() {
+        int maxCurrentId = Collections.max(ids);
+        ids.add(++maxCurrentId);
+        return maxCurrentId;
+    }
+
     private void addElement(Person person) throws XMLStreamException{
         String elementName = "person";
 
         xmlEventWriter.add(end);
         xmlEventWriter.add(eventFactory.createStartElement("", "", elementName));
-        xmlEventWriter.add(eventFactory.createAttribute("id", UUID.randomUUID().toString()));
+        xmlEventWriter.add(eventFactory.createAttribute("id", getNextId() + ""));
         xmlEventWriter.add(end);
 
         Map<String, Object> objectMap = convertObjectToMap(person);
         Set<String> elementNodes = objectMap.keySet();
         for(String key : elementNodes){
-            ArrayList<String> values = new ArrayList<>();
-            Object value = objectMap.get(key);
-            if (value instanceof String) {
-                values.add((String)value);
-            } else if (value instanceof Integer) {
-                values.add(value + "");
-            } else if (value instanceof ArrayList) {
-                values = (ArrayList<String>)objectMap.get(key);
-            }
+            ArrayList<String> values = getValues(key, objectMap);
             XMLEvent tab = eventFactory.createDTD("\t");
             if (!key.equals("id")) {
                 addNode(key, values, tab);
@@ -260,5 +254,18 @@ public class StaxXmlAssistant {
     private Map<String, Object> convertObjectToMap(Person person) {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.convertValue(person, Map.class);
+    }
+
+    private ArrayList<String> getValues(String key, Map<String, Object> map) {
+        ArrayList<String> values = new ArrayList<>();
+        Object value = map.get(key);
+        if (value instanceof String) {
+            values.add((String)value);
+        } else if (value instanceof Integer) {
+            values.add(value + "");
+        } else if (value instanceof ArrayList) {
+            values = (ArrayList<String>)map.get(key);
+        }
+        return values;
     }
 }
