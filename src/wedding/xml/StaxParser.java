@@ -1,18 +1,24 @@
 package wedding.xml;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.xml.sax.SAXException;
 import wedding.models.Person;
 
+import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.stream.*;
 import javax.xml.stream.events.*;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 import java.io.*;
 import java.util.*;
 
 /**
  * Created by Antonina on 6/18/2017.
  */
-public class StaxXmlAssistant {
+public class StaxParser {
     private XMLEventWriter xmlEventWriter;
     private XMLEventReader xmlEventReader;
     private XMLEventFactory eventFactory;
@@ -20,7 +26,7 @@ public class StaxXmlAssistant {
 
     private ArrayList<Integer> ids = new ArrayList<>();
 
-    public StaxXmlAssistant() {
+    public StaxParser() {
         eventFactory = XMLEventFactory.newInstance();
         end = eventFactory.createDTD("\n");
     }
@@ -59,6 +65,11 @@ public class StaxXmlAssistant {
         Person person = null;
         ArrayList<String> propositions = null, demands = null;
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+
+        if (!validateXMLSchema("people.xsd", fileName)) {
+            return null;
+        }
+
         try {
             xmlEventReader = xmlInputFactory.createXMLEventReader(new FileInputStream(fileName));
             while(xmlEventReader.hasNext()) {
@@ -218,7 +229,7 @@ public class StaxXmlAssistant {
     }
 
     private void addNode(String key, ArrayList<String> values, XMLEvent tab) throws XMLStreamException{
-        if (values.size() > 1) {
+        if (values.size() > 1 || key.equals("propositions") || key.equals("demands")) {
             XMLEvent doubleTab = eventFactory.createDTD("\t \t");
             xmlEventWriter.add(tab);
             addStartElement(key);
@@ -267,5 +278,23 @@ public class StaxXmlAssistant {
             values = (ArrayList<String>)map.get(key);
         }
         return values;
+    }
+
+    private boolean validateXMLSchema(String xsdPath, String xmlPath) {
+        try {
+            SchemaFactory factory =
+                    SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            Schema schema = factory.newSchema(new File(xsdPath));
+            Validator validator = schema.newValidator();
+            validator.validate(new StreamSource(new File(xmlPath)));
+        } catch (IOException e) {
+            System.out.println("Exception: " + e.getMessage());
+            return false;
+        } catch (SAXException e1) {
+            System.out.println("SAX Exception: " + e1.getMessage());
+            return false;
+        }
+
+        return true;
     }
 }

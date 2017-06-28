@@ -1,4 +1,4 @@
-package wedding.client;
+package wedding;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;

@@ -1,41 +1,54 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <people>
-<person id="1">
-	<birthYear>1975</birthYear>
-	<name>Jack</name>
-	<surname>Nicols</surname>
-	<propositions>nice</propositions>
-	<demands>kind</demands>
-	<fullName>Jack Nicols</fullName>
-</person>
-<person id="2">
-	<birthYear>1977</birthYear>
-	<name>Max</name>
-	<surname>Potre</surname>
-	<propositions>
-	 	<proposition>responsible</proposition>
-	 	<proposition>nice</proposition>
-	</propositions>
-	<demands>
-	 	<demand>friendly</demand>
-	 	<demand>kind</demand>
-	</demands>
-	<fullName>Max Potre</fullName>
-</person>
-<person id="3">
-	<birthYear>1992</birthYear>
-	<name>Herardo</name>
-	<surname>Protu</surname>
-	<propositions>good</propositions>
-	<demands>cheerful</demands>
-	<fullName>Herardo Protu</fullName>
-</person>
-<person id="4">
-	<birthYear>1994</birthYear>
-	<name>Ankit</name>
-	<surname>Wuite</surname>
-	<propositions>responsible</propositions>
-	<demands>romantic</demands>
-	<fullName>Ankit Wuite</fullName>
-</person>
+
+    <person id="1">
+        <birthYear>1975</birthYear>
+        <name>Jack</name>
+        <surname>Nicols</surname>
+        <propositions>
+            <proposition>nice</proposition>
+        </propositions>
+        <demands>
+            <demand>kind</demand>
+        </demands>
+        <fullName>Jack Nicols</fullName>
+    </person>
+    <person id="2">
+        <birthYear>1977</birthYear>
+        <name>Max</name>
+        <surname>Potre</surname>
+        <propositions>
+            <proposition>responsible</proposition>
+            <proposition>nice</proposition>
+        </propositions>
+        <demands>
+            <demand>friendly</demand>
+            <demand>kind</demand>
+        </demands>
+        <fullName>Max Potre</fullName>
+    </person>
+    <person id="3">
+        <birthYear>1992</birthYear>
+        <name>Herardo</name>
+        <surname>Protu</surname>
+        <propositions>
+            <proposition>good</proposition>
+        </propositions>
+        <demands>
+            <demand>cheerful</demand>
+        </demands>
+        <fullName>Herardo Protu</fullName>
+    </person>
+    <person id="4">
+        <birthYear>1994</birthYear>
+        <name>Ankit</name>
+        <surname>Wuite</surname>
+        <propositions>
+            <proposition>responsible</proposition>
+        </propositions>
+        <demands>
+            <demand>romantic</demand>
+        </demands>
+        <fullName>Ankit Wuite</fullName>
+    </person>
 </people>

@@ -1,17 +1,29 @@
-package wedding.server;
+package wedding;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.*;
 
 import wedding.models.Couple;
 import wedding.models.Person;
+import wedding.rmi.analyzer.AnalyzerI;
 
-public class Analyser implements Serializable {
+public class Analyzer extends UnicastRemoteObject implements AnalyzerI, Serializable {
 
 	private static final long serialVersionUID = 1L;
+
+	public Analyzer() throws RemoteException {}
+
+	public List getBestCouples(List brides, List grooms) throws RemoteException{
+		ArrayList<Couple> bestCouples = null;
+		try {
+			bestCouples = analyseBridesAndGrooms((ArrayList<Person>) brides, (ArrayList<Person>) grooms);
+		} catch (NullPointerException e) {
+			System.out.println("No couples");
+		}
+		return bestCouples;
+	}
 
 	/**
 	 * Returns the list of 'the most suitable' couples 
@@ -24,7 +36,7 @@ public class Analyser implements Serializable {
 	 * @see java.lang.NullPointerException
 	 * 
 	 */
-	public ArrayList<Couple> analyseBridesAndGrooms(ArrayList<Person> brides, ArrayList<Person> grooms)
+	private ArrayList<Couple> analyseBridesAndGrooms(ArrayList<Person> brides, ArrayList<Person> grooms)
 			throws NullPointerException {
 
 		HashMap<String, ArrayList<Person>> groomsSupplies = getSupplies(grooms);
@@ -75,7 +87,7 @@ public class Analyser implements Serializable {
 		return couples;
 	}
 
-	public HashMap<String, ArrayList<Person>> getSupplies(ArrayList<Person> persons) {
+	private HashMap<String, ArrayList<Person>> getSupplies(ArrayList<Person> persons) {
 
 		ArrayList<String> valueArray;
 		HashMap<String, ArrayList<Person>> valueMap = new HashMap<String, ArrayList<Person>>();

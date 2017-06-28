@@ -6,7 +6,6 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
@@ -35,13 +34,17 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.xml.bind.JAXBException;
 
 import org.json.JSONException;
-import wedding.client.AddPersonDialog;
 import wedding.models.Couple;
 import wedding.models.Person;
 import wedding.models.Request;
-import wedding.server.ServerAssistantI;
+import wedding.rmi.analyzer.AnalyzerI;
+import wedding.rmi.database.DatabaseAssistantI;
+import wedding.rmi.xml.jaxb.JaxbXmlAssistant;
+import wedding.rmi.xml.jaxb.JaxbXmlAssistantI;
+import wedding.rmi.xml.stax.StaxXmlAssistantI;
 
 /**
  * <h1> Wedding </h1>
@@ -51,7 +54,7 @@ import wedding.server.ServerAssistantI;
  * from the list of men and women </div>
  * <div>Technologies</div>
  * <ul>
- * 	<li>Remote method invocation, see {@link wedding.server.ServerAssistantI}</li>
+ * 	<li>Remote method invocation, see {@link DatabaseAssistantI}</li>
  * 	<li>Serialization, see {@link wedding.models.Person}</li>
  * 	<li>Database connection, see {@link wedding.database.SQLAssistant}</li>
  * </ul>
@@ -60,16 +63,16 @@ import wedding.server.ServerAssistantI;
  *
  */
 public class MainClient implements NetworkConstants {
-	ServerAssistantI serverAssistant;
-
-	public static void main(String[] args) throws ClassNotFoundException, IOException, SQLException, JSONException {
+	public static void main(String[] args) throws ClassNotFoundException, IOException, SQLException, JSONException, JAXBException {
 		MainClient mainClient = new MainClient();
 		
 		try {
 			Registry registry = LocateRegistry.getRegistry(HOST, REGISTRY_PORT);
-			String addres = "rmi://" + HOST + ":" + APP_PORT + "/ServerAssistantI";
-			mainClient.serverAssistant = (ServerAssistantI)registry.lookup(addres);
-			FrameAssistant frameAssistant = new FrameAssistant("Wedding!", mainClient.serverAssistant);
+			String appAddress = "rmi://" + HOST + ":" + APP_PORT;
+			AnalyzerI analyzer = (AnalyzerI)registry.lookup(appAddress + "/AnalyzerI");
+			StaxXmlAssistantI staxXmlAssistant = (StaxXmlAssistantI)registry.lookup(appAddress + "/StaxXmlAssistantI");
+			JaxbXmlAssistantI jaxbXmlAssistant = (JaxbXmlAssistantI)registry.lookup(appAddress + "/JaxbXmlAssistantI");
+			FrameAssistant frameAssistant = new FrameAssistant("Wedding!", jaxbXmlAssistant, analyzer);
 			frameAssistant.setSize(1300, 900);
 			frameAssistant.setVisible(true);
 		} catch (RemoteException e) {
@@ -94,14 +97,17 @@ class FrameAssistant extends JFrame implements ActionListener {
 	AddPersonDialog dialog;
 	JPanel checkPanel, textPanel;
 	JTextArea textArea, wordWrapArea;
-	ServerAssistantI serverAssistant;
+	JaxbXmlAssistantI storage;
+	AnalyzerI analyzer;
 	Boolean isBrideListChanged, isGroomListChanged, isNewFileCreated;
 	ArrayList<Request> requests = new ArrayList<>();
+	ArrayList<Integer> ids = new ArrayList<>();
 	String TECHNOLOGY_TYPE = "xml";
 
-	public FrameAssistant(String s, ServerAssistantI serverAssistantI) throws ClassNotFoundException, IOException, SQLException, NullPointerException, JSONException {
+	public FrameAssistant(String s, Object storage, AnalyzerI analyzer) throws ClassNotFoundException, IOException, SQLException, NullPointerException, JSONException, JAXBException {
 		super(s);
-		this.serverAssistant = serverAssistantI;
+		this.storage = (JaxbXmlAssistantI)storage;
+		this.analyzer = analyzer;
 
 		getData();
 		selectedBrides = new ArrayList<Person>();
@@ -118,15 +124,18 @@ class FrameAssistant extends JFrame implements ActionListener {
 		closeWindow();
 	}
 
-	private void getData() throws JSONException, ClassNotFoundException, IOException, SQLException, NullPointerException {
-		ArrayList<Person> brides = serverAssistant.doRequest(new Request<Person>(
+	private void getData() throws JSONException, ClassNotFoundException, IOException, SQLException, NullPointerException, JAXBException {
+		ArrayList<Person> brides = (ArrayList<Person>)storage.read(new Request<Person>(
 				"read",
 				TECHNOLOGY_TYPE,
 				"bride"));
-		ArrayList<Person> grooms = serverAssistant.doRequest(new Request<Person>(
+		ArrayList<Person> grooms =(ArrayList<Person>) storage.read(new Request<Person>(
 				"read",
 				TECHNOLOGY_TYPE,
 				"groom"));
+
+		grooms.forEach((Person person) -> ids.add(person.getId()));
+		brides.forEach((Person person) -> ids.add(person.getId()));
 
 		isBrideListChanged = false;
 		isGroomListChanged = false;
@@ -143,9 +152,9 @@ class FrameAssistant extends JFrame implements ActionListener {
 			groomListModel.addElement(groom);
 		}
 
-		ArrayList<Couple> bestCouples = serverAssistant.getBestCouples(brides, grooms);
+		ArrayList<Couple> bestCouples = (ArrayList<Couple>)analyzer.getBestCouples(brides, grooms);
 		if (bestCouples != null) {
-			for (Couple couple : serverAssistant.getBestCouples(brides, grooms)) {
+			for (Couple couple : bestCouples) {
 				coupleListModel.addElement(couple);
 			}
 		}
@@ -234,7 +243,7 @@ class FrameAssistant extends JFrame implements ActionListener {
 					if (isGroomListChanged) {
 						showSaveDialog("Do you want to save grooms?", "groom");
 					}
-				} catch(RemoteException | JSONException e) {
+				} catch(RemoteException | JSONException | JAXBException e) {
 					System.out.println(e.getClass() + ": " + e.getMessage());
 				}
 				System.exit(0);
@@ -242,7 +251,7 @@ class FrameAssistant extends JFrame implements ActionListener {
 		});
 	}
 	
-	private void showSaveDialog(String dialogText, String tableName) throws RemoteException, JSONException {
+	private void showSaveDialog(String dialogText, String tableName) throws RemoteException, JSONException, JAXBException {
 		int reply = JOptionPane.showConfirmDialog(null, dialogText,
 				"Really Closing?", JOptionPane.YES_NO_OPTION);
 		if (reply == JOptionPane.YES_OPTION) {
@@ -320,6 +329,7 @@ class FrameAssistant extends JFrame implements ActionListener {
 				openDialog();
 				if (dialog.getStatus()) {
 					Person newPerson = dialog.getPerson();
+					newPerson.setId(getUniqueId());
 					brideListModel.addElement(newPerson);
 					requests.add(new Request<Person>(
 							"create",
@@ -331,6 +341,7 @@ class FrameAssistant extends JFrame implements ActionListener {
 				openDialog();
 				if (dialog.getStatus()) {
 					Person newPerson = dialog.getPerson();
+					newPerson.setId(getUniqueId());
 					groomListModel.addElement(newPerson);
 					requests.add(new Request<Person>(
 							"create",
@@ -340,7 +351,7 @@ class FrameAssistant extends JFrame implements ActionListener {
 				}
 			} else if (e.getSource() == checkItem) {
 				coupleListModel.clear();
-				for (Couple couple : serverAssistant.getBestCouples(Collections.list(brideListModel.elements()),
+				for (Couple couple : (ArrayList<Couple>)analyzer.getBestCouples(Collections.list(brideListModel.elements()),
 						Collections.list(groomListModel.elements()))) {
 					coupleListModel.addElement(couple);
 				}
@@ -373,7 +384,7 @@ class FrameAssistant extends JFrame implements ActionListener {
 				}
 				selectedGrooms.clear();
 			} 
-		} catch (RemoteException | JSONException e1) {
+		} catch (RemoteException | JSONException | JAXBException e1) {
 			System.out.println(e1.getMessage());
 		}
 	}
@@ -385,12 +396,19 @@ class FrameAssistant extends JFrame implements ActionListener {
 		dialog.setVisible(true);
 	}
 
-	private void doRequests(String tableName) throws RemoteException, JSONException {
+	private void doRequests(String tableName) throws RemoteException, JSONException, JAXBException {
 		Iterator<Request> iterator = requests.iterator();
 		while (iterator.hasNext()) {
 			Request request = iterator.next();
 			if (request.getStorageName().equals(tableName)) {
-				serverAssistant.doRequest(request);
+				switch(request.getRequestType()) {
+					case "delete":
+						storage.delete(request);
+						break;
+					case "create":
+						storage.create(request);
+						break;
+				}
 				iterator.remove();
 			}
 		}
@@ -402,5 +420,11 @@ class FrameAssistant extends JFrame implements ActionListener {
 		}
 		
 		JOptionPane.showMessageDialog(null, "Save!");
+	}
+
+	private int getUniqueId() {
+		int id = Collections.max(ids) + 1;
+		ids.add(id);
+		return id;
 	}
 }

@@ -1,19 +1,5 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <people>
-    <person id="1">
-        <birthYear>1992</birthYear>
-        <name>Nastia</name>
-        <surname>Kavrus</surname>
-        <propositions>
-            <proposition>nice</proposition>
-            <proposition>ambitious</proposition>
-        </propositions>
-        <demands>
-            <demand>nice</demand>
-            <demand>ambitious</demand>
-        </demands>
-        <fullName>Nastia Kavrus</fullName>
-    </person>
     <person id="2">
         <birthYear>1980</birthYear>
         <name>Kate</name>
@@ -36,23 +22,33 @@
             <proposition>ugly</proposition>
             <proposition>kind</proposition>
         </propositions>
-        <demands>gentle</demands>
+        <demands>
+            <demand>gentle</demand>
+        </demands>
         <fullName>Jacklin Potter</fullName>
     </person>
     <person id="4">
         <birthYear>1993</birthYear>
         <name>Alba</name>
         <surname>Keturo</surname>
-        <propositions>cheerful</propositions>
-        <demands>good</demands>
+        <propositions>
+            <proposition>cheerful</proposition>
+        </propositions>
+        <demands>
+            <demand>good</demand>
+        </demands>
         <fullName>Alba Keturo</fullName>
     </person>
     <person id="5">
         <birthYear>1995</birthYear>
         <name>Anna</name>
         <surname>Bowel</surname>
-        <propositions>romantic</propositions>
-        <demands>responsible</demands>
+        <propositions>
+            <proposition>romantic</proposition>
+        </propositions>
+        <demands>
+            <demand>responsible</demand>
+        </demands>
         <fullName>Anna Bowel</fullName>
     </person>
 </people>
