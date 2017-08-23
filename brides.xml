@@ -51,4 +51,20 @@
         </demands>
         <fullName>Anna Bowel</fullName>
     </person>
+    <person id="11">
+        <birthYear>1989</birthYear>
+        <name>Nacki</name>
+        <surname>Kzo</surname>
+        <propositions>
+            <proposition>it</proposition>
+            <proposition>dogs</proposition>
+            <proposition>sport</proposition>
+        </propositions>
+        <demands>
+            <demand>sport</demand>
+            <demand>travel</demand>
+            <demand>food</demand>
+        </demands>
+        <fullName>Nacki Kzo</fullName>
+    </person>
 </people>

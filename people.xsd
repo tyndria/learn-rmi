@@ -12,7 +12,14 @@
 
     <xs:complexType name="PersonType">
         <xs:sequence>
-            <xs:element name="birthYear" type="xs:string"/>
+            <xs:element name="birthYear">
+                <xs:simpleType>
+                    <xs:restriction base="xs:integer">
+                        <xs:minInclusive value="1900"/>
+                        <xs:maxInclusive value="2001"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
             <xs:element name="name" type="xs:string"/>
             <xs:element name="surname" type="xs:string"/>
             <xs:element name="propositions" >

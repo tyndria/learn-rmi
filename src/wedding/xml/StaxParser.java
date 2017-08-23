@@ -67,7 +67,7 @@ public class StaxParser {
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
 
         if (!validateXMLSchema("people.xsd", fileName)) {
-            return null;
+            return people;
         }
 
         try {
@@ -94,10 +94,8 @@ public class StaxParser {
                         person.setSurname(getEventData());
                     } else if(startElement.getName().getLocalPart().equals("propositions")) {
                         propositions = new ArrayList<>();
-                        addDataToArray(propositions);
                     } else if(startElement.getName().getLocalPart().equals("demands")) {
                         demands = new ArrayList<>();
-                        addDataToArray(demands);
                     } else if (startElement.getName().getLocalPart().equals("demand")) {
                         if (demands != null) {
                             demands.add(getEventData());
@@ -130,13 +128,6 @@ public class StaxParser {
     private String getEventData() throws XMLStreamException{
         XMLEvent xmlEvent = xmlEventReader.nextEvent();
         return xmlEvent.asCharacters().getData();
-    }
-
-    private void addDataToArray(ArrayList arrayList) throws XMLStreamException{
-        String data = getEventData();
-        if (isRealData(data)) {
-            arrayList.add(data);
-        }
     }
 
     public void create(String fileName, Person person) {
@@ -195,10 +186,6 @@ public class StaxParser {
         } catch (XMLStreamException | IOException e) {
             System.out.print(e.getClass() + ": " + e.getCause());
         }
-    }
-
-    private boolean isRealData(String data) {
-        return data.matches(".*[a-zA-Z]+.*");
     }
 
     private Integer getNextId() {
@@ -280,7 +267,7 @@ public class StaxParser {
         return values;
     }
 
-    private boolean validateXMLSchema(String xsdPath, String xmlPath) {
+    private boolean validateXMLSchema(String xsdPath, String xmlPath){
         try {
             SchemaFactory factory =
                     SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);

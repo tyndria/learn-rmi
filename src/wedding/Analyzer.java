@@ -48,11 +48,15 @@ public class Analyzer extends UnicastRemoteObject implements AnalyzerI, Serializ
 			brideDescription.sort(Comparator.naturalOrder());
 
 			HashSet<Person> currentIntersection = new HashSet<>();
-			
+
 			if (brideDemands.size() > 1) {
-				for (int i = 1; i < brideDemands.size(); i++) {
+				for (int i = 0; i < brideDemands.size(); i++) {
 					if (groomsSupplies.containsKey(brideDemands.get(i))) {
-						currentIntersection.retainAll(groomsSupplies.get(brideDemands.get(i)));
+						if (i == 0) {
+							currentIntersection = new HashSet<>(groomsSupplies.get(brideDemands.get(0)));
+						} else {
+							currentIntersection.retainAll(groomsSupplies.get(brideDemands.get(i)));
+						}
 					}
 				}
 			} else {

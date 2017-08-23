@@ -72,7 +72,7 @@ public class MainClient implements NetworkConstants {
 			AnalyzerI analyzer = (AnalyzerI)registry.lookup(appAddress + "/AnalyzerI");
 			StaxXmlAssistantI staxXmlAssistant = (StaxXmlAssistantI)registry.lookup(appAddress + "/StaxXmlAssistantI");
 			JaxbXmlAssistantI jaxbXmlAssistant = (JaxbXmlAssistantI)registry.lookup(appAddress + "/JaxbXmlAssistantI");
-			FrameAssistant frameAssistant = new FrameAssistant("Wedding!", jaxbXmlAssistant, analyzer);
+			FrameAssistant frameAssistant = new FrameAssistant("Wedding!", staxXmlAssistant, analyzer);
 			frameAssistant.setSize(1300, 900);
 			frameAssistant.setVisible(true);
 		} catch (RemoteException e) {
@@ -97,7 +97,7 @@ class FrameAssistant extends JFrame implements ActionListener {
 	AddPersonDialog dialog;
 	JPanel checkPanel, textPanel;
 	JTextArea textArea, wordWrapArea;
-	JaxbXmlAssistantI storage;
+	StaxXmlAssistantI storage;
 	AnalyzerI analyzer;
 	Boolean isBrideListChanged, isGroomListChanged, isNewFileCreated;
 	ArrayList<Request> requests = new ArrayList<>();
@@ -106,7 +106,7 @@ class FrameAssistant extends JFrame implements ActionListener {
 
 	public FrameAssistant(String s, Object storage, AnalyzerI analyzer) throws ClassNotFoundException, IOException, SQLException, NullPointerException, JSONException, JAXBException {
 		super(s);
-		this.storage = (JaxbXmlAssistantI)storage;
+		this.storage = (StaxXmlAssistantI)storage;
 		this.analyzer = analyzer;
 
 		getData();
@@ -159,9 +159,9 @@ class FrameAssistant extends JFrame implements ActionListener {
 			}
 		}
 
-		brideJList = new JList<Person>(brideListModel);
-		groomJList = new JList<Person>(groomListModel);
-		coupleJList = new JList<Couple>(coupleListModel);
+		brideJList = new JList<>(brideListModel);
+		groomJList = new JList<>(groomListModel);
+		coupleJList = new JList<>(coupleListModel);
 
 		selectionProcess();
 		listModelChangingProcess();
